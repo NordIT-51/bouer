@@ -1,54 +1,42 @@
 #!/bin/bash
 
-# Функция для создания таблицы смещений
-function create_shift_table {
-    local pattern=$1
-    local pattern_length=${#pattern}
-
-    # Создаем ассоциативный массив для хранения таблицы смещений
-    declare -A shift_table
-
-    # Инициализируем таблицу смещений
-    for (( i=0; i<$pattern_length; i++ )); do
-        shift_table[${pattern:$i:1}]=$(( $pattern_length - $i - 1 ))
-    done
-
-    # Возвращаем таблицу смещений
-    echo "${!shift_table[@]}:${shift_table[@]}"
-}
-
-# Функция для поиска подстроки в строке с использованием алгоритма Бойера-Мура
-function boyer_moore_search {
-    local string=$1
-    local pattern=$2
+# Функция для поиска всех вхождений подстроки в строку
+# Входные параметры: $1 - строка, $2 - подстрока
+boyer_moore() {
+    local string="$1"
+    local pattern="$2"
     local string_length=${#string}
     local pattern_length=${#pattern}
 
-    # Создаем таблицу смещений
-    local shift_table=$(create_shift_table $pattern)
+    # Создаем таблицу смещений для каждого символа в паттерне
+    declare -A offset_table
+    for ((i=0; i<${pattern_length}; i++)); do
+        offset_table[${pattern:i:1}]=$((pattern_length-i-1))
+    done
 
-    # Инициализируем переменные
-    local i=$pattern_length
-    local j=$pattern_length
+    local i=${pattern_length}-1
+    while ((i < ${string_length})); do
+        local j=${pattern_length}-1
+        local k=$i
 
-    # Пока не достигнут конец строки
-    while (( $i <= $string_length )); do
-        # Если символы совпадают, продолжаем двигаться влево
-        if [[ ${string:$i-1:1} == ${pattern:$j-1:1} ]]; then
-            (( i-- ))
-            (( j-- ))
+        # Проверяем совпадение символов с конца паттерна
+        while [[ ${j} -ge 0 && ${string:k:1} == ${pattern:j:1} ]]; do
+            ((k--))
+            ((j--))
+        done
 
-            # Если найдено полное совпадение, выводим позицию
-            if (( $j == 0 )); then
-                echo "Найдено вхождение на позиции $i"
-                (( i += $pattern_length + 1 ))
-                (( j = $pattern_length ))
-            fi
+        # Если найдено совпадение, выводим индекс вхождения и смещаемся на следующее вхождение
+        if [[ ${j} -lt 0 ]]; then
+            echo "Найдено вхождение на позиции ${k}"
+            ((i+=pattern_length))
         else
-            # Получаем смещение из таблицы смещений
-            local shift=${shift_table[${string:$i-1:1}]}
-            (( i += $pattern_length - shift ))
-            (( j = $pattern_length ))
+            # Вычисляем смещение в соответствии с таблицей смещений
+            local offset=${offset_table[${string:i:1}]}
+            if [[ -z ${offset} ]]; then
+                ((i+=pattern_length))
+            else
+                ((i+=offset))
+            fi
         fi
     done
 }
@@ -58,4 +46,4 @@ text=$1
 pattern=$2
 echo "Строка: $text"
 echo "Искомая последовательность: $pattern"
-boyer_moore_search $text $pattern
+boyer_moore $text $pattern
