@@ -14,10 +14,10 @@ function create_shift_table {
     done
 
     # Возвращаем таблицу смещений
-    echo "${shift_table[@]}"
+    echo "${!shift_table[@]}:${shift_table[@]}"
 }
 
-# Функция для поиска подстроки в строке с использованием алгоритма Боуера-Мура
+# Функция для поиска подстроки в строке с использованием алгоритма Бойера-Мура
 function boyer_moore_search {
     local string=$1
     local pattern=$2
@@ -47,7 +47,7 @@ function boyer_moore_search {
         else
             # Получаем смещение из таблицы смещений
             local shift=${shift_table[${string:$i-1:1}]}
-            (( i += $pattern_length - min($j, 1 + $shift) ))
+            (( i += $pattern_length - shift ))
             (( j = $pattern_length ))
         fi
     done
