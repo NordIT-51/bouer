@@ -19,7 +19,7 @@ create_shift_table() {
     echo "${!shift_table[@]}:${shift_table[@]}"
 }
 
-# Функция для поиска подстроки в строке с использованием алгоритма Боуера-Мура
+# Функция для поиска всех вхождений подстроки в строку с использованием алгоритма Боуера-Мура
 boyer_moore() {
     local text=$1
     local pattern=$2
@@ -40,18 +40,19 @@ boyer_moore() {
         while [[ ${text:i:1} == ${pattern:j:1} ]]; do
             if [[ $j -eq 0 ]]; then
                 echo "Подстрока найдена в позиции $((i - m + 1))"
-                return 0
+                break
             fi
 
             i=$((i - 1))
             j=$((j - 1))
         done
 
-        i=$((i + ${values[${text:i:1}]}))
+        if [[ $j -eq 0 ]]; then
+            i=$((i + ${values[${text:i:1}]}))
+        else
+            i=$((i + m))
+        fi
     done
-
-    echo "Подстрока не найдена"
-    return 1
 }
 
 text=$1
