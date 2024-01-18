@@ -8,12 +8,8 @@ create_shift_table() {
     local j
     declare -A shift_table
 
-    for ((i=0; i<m; i++)); do
-        shift_table[${pattern:i:1}]=${m}
-    done
-
     for ((i=0; i<m-1; i++)); do
-        shift_table[${pattern:i:1}]=$(($m - $i - 1))
+        shift_table[${pattern:i:1}]=$((m - $i - 1))
     done
 
     echo "${!shift_table[@]}:${shift_table[@]}"
@@ -48,9 +44,9 @@ boyer_moore() {
         done
 
         if [[ $j -eq 0 ]]; then
-            i=$((i + ${values[${text:i:1}]}))
-        else
             i=$((i + m))
+        else
+            i=$((i + ${values[${text:i:1}]}))
         fi
     done
 }
