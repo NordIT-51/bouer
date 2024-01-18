@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# Функция для поиска всех вхождений подстроки в строку
-# Входные параметры: $1 - строка, $2 - подстрока
 boyer_moore() {
     local string="$1"
     local pattern="$2"
     local string_length=${#string}
     local pattern_length=${#pattern}
 
-    # Создаем таблицу смещений для каждого символа в паттерне
     declare -A offset_table
     for ((i=0; i<${pattern_length}; i++)); do
         offset_table[${pattern:i:1}]=$((pattern_length-i-1))
@@ -19,19 +16,16 @@ boyer_moore() {
         local j=${pattern_length}-1
         local k=$i
 
-        # Проверяем совпадение символов с конца паттерна
         while [[ ${j} -ge 0 && ${string:k:1} == ${pattern:j:1} ]]; do
             ((k--))
             ((j--))
         done
 
-        # Если найдено совпадение, выводим индекс вхождения и смещаемся на следующее вхождение
         if [[ ${j} -lt 0 ]]; then
-            echo "Найдено вхождение на позиции ${k}"
+            echo "Найдено вхождение на позиции $((k+1))"
             ((i+=pattern_length))
         else
-            # Вычисляем смещение в соответствии с таблицей смещений
-            local offset=${offset_table[${string:i:1}]}
+            local offset=${offset_table[${string:k:1}]}
             if [[ -z ${offset} ]]; then
                 ((i+=pattern_length))
             else
