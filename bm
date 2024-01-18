@@ -23,7 +23,7 @@ boyer_moore() {
 
         if [[ ${j} -lt 0 ]]; then
             echo "Найдено вхождение на позиции $((i+1))"
-            ((i+=pattern_length))
+            ((i+=1))
         else
             local offset=${offset_table[${string:k:1}]}
             if [[ -z ${offset} ]]; then
